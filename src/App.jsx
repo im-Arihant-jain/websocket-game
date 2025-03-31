@@ -71,9 +71,24 @@ const App = () => {
   };
 socket?.on("connect",()=>{
   setPlayGame(true);
-  
 }
 ) 
+socket?.on("start_game",(name)=>{
+  setOpponentPlayer(name);  
+});
+socket?.on("wait_for_opponent",()=>{
+    setOpponentPlayer('');
+});
+socket?.on("play_move", (data) => {
+  setGameState((prev) => {
+    const newGameState = [...prev];
+    newGameState[Math.floor(data.id / 3)][data.id % 3] = data.currentPlayer;
+    return newGameState;
+  });
+
+  // Update the current player based on the move received
+  setCurrentPlayer(data.currentPlayer === "circle" ? "cross" : "circle");
+});
   const playOnline = async () => { 
   const name =  await takePlayerName();
   if(name!==null){
@@ -102,30 +117,35 @@ socket?.on("connect",()=>{
   return <div className="main-div">
     <div>
       <div className="move-detection">
-        <div className="left">YoUrself</div>
-        <div className="right">Opponent</div>
+        <div className="left">{playername}</div>
+        <div className="right">{opponentPlayer}</div>
       </div>
       <h1 className="game-heading water-background"> Tic-Tac-Toe</h1>
   <div className="square-wrapper">
   {gameState.map((row, rowIndex) => (
       row.map((col, colIndex) => (    
         <Square
+        gameState={gameState}
+        socket={socket}
         setFinishedState={setFinishedState}
         finishedState={finishedState}
         currentPlayer={currentPlayer}
         setCurrentPlayer={setCurrentPlayer} 
         finishedarr={finishedarr}
         setGameState = {setGameState}
-
+        currentElement={col}
         id={rowIndex*3 + colIndex} 
         key = {rowIndex*3 + colIndex} />
        
       ))  
-  ))}
+  ))} 
+  
 </div>
 <h1 className="finished-state">{finishedState ? winner == 'draw' ?'Draw':`Game Over: Winner ${winner}` : ''}</h1>
     </div>
   </div>;
 }
 export default App;
+
+
 

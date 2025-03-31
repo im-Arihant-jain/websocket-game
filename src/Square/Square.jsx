@@ -20,7 +20,7 @@ const circleSvg = (
     </g>
   </svg>
 );
-
+      
 const crossSvg = (
   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
@@ -43,8 +43,11 @@ const crossSvg = (
 );
 const Square = ({
   id,
+  socket,
+  gameState,
   finishedarr,
   setGameState,
+  currentElement,
   finishedState,
   setFinishedState,
   currentPlayer,
@@ -65,24 +68,30 @@ const Square = ({
         setIcon(circleSvg);
         setCurrentPlayer('cross');
     }else{
-      
       setIcon(crossSvg);
       setCurrentPlayer('circle');
     }
+    socket.emit("play_move", { currentPlayer:currentPlayer,id:id });
     setGameState((prev)=>{
       const newGameState = [...prev];
       newGameState[Math.floor(id/3)][id%3] = currentPlayer;
-    // 
       return newGameState;
     });
+    
   }
   
   }
   return (
+    <>
     <div onClick={clickOnsquare} 
     style={{ backgroundColor: color === "black" ? "#4b495f" : "blue" }} 
-    className={ `square ${finishedState ? 'not-allowed':'' } `}>{icon}</div>
+    className={ `square ${finishedState ? 'not-allowed':'' } `}>{currentElement === "circle"
+      ? circleSvg
+      : currentElement === "cross"      
+      ? crossSvg
+      : icon}</div> 
     
+    </> 
   );
 }
 export default Square;
